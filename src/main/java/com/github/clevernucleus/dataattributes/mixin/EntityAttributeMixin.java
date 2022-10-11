@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.github.clevernucleus.dataattributes.api.attribute.IEntityAttribute;
 import com.github.clevernucleus.dataattributes.api.attribute.StackingBehaviour;
+import com.github.clevernucleus.dataattributes.api.attribute.FunctionBehaviour;
 import com.github.clevernucleus.dataattributes.api.event.EntityAttributeModifiedEvents;
 import com.github.clevernucleus.dataattributes.mutable.MutableEntityAttribute;
 import com.google.common.collect.ImmutableMap;
@@ -29,6 +30,7 @@ abstract class EntityAttributeMixin implements MutableEntityAttribute {
 	@Unique private Map<IEntityAttribute, Double> data_parents, data_children;
 	@Unique private Map<String, String> data_properties;
 	@Unique private StackingBehaviour data_stackingBehaviour;
+	@Unique private FunctionBehaviour data_functionBehaviour;
 	@Unique private String data_translationKey;
 	@Unique protected double data_fallbackValue, data_minValue, data_maxValue, data_incrementValue;
 	
@@ -47,6 +49,7 @@ abstract class EntityAttributeMixin implements MutableEntityAttribute {
 		this.data_minValue = Integer.MIN_VALUE;
 		this.data_maxValue = Integer.MAX_VALUE;
 		this.data_stackingBehaviour = StackingBehaviour.FLAT;
+		this.data_functionBehaviour = FunctionBehaviour.ADD;
 		this.data_parents = new Object2DoubleArrayMap<IEntityAttribute>();
 		this.data_children = new Object2DoubleArrayMap<IEntityAttribute>();
 		this.data_properties = new HashMap<String, String>();
@@ -78,13 +81,14 @@ abstract class EntityAttributeMixin implements MutableEntityAttribute {
 	}
 	
 	@Override
-	public void override(String translationKey, double minValue, double maxValue, double fallbackValue, double incrementValue, StackingBehaviour stackingBehaviour) {
+	public void override(String translationKey, double minValue, double maxValue, double fallbackValue, double incrementValue, StackingBehaviour stackingBehaviour, FunctionBehaviour functionBehaviour) {
 		this.data_translationKey = translationKey;
 		this.data_minValue = minValue;
 		this.data_maxValue = maxValue;
 		this.data_incrementValue = incrementValue;
 		this.data_fallbackValue = fallbackValue;
 		this.data_stackingBehaviour = stackingBehaviour;
+		this.data_functionBehaviour = functionBehaviour;
 	}
 	
 	@Override
@@ -108,7 +112,7 @@ abstract class EntityAttributeMixin implements MutableEntityAttribute {
 	
 	@Override
 	public void clear() {
-		this.override(this.translationKey, this.fallback, this.fallback, this.fallback, 0.0D, StackingBehaviour.FLAT);
+		this.override(this.translationKey, this.fallback, this.fallback, this.fallback, 0.0D, StackingBehaviour.FLAT, FunctionBehaviour.ADD);
 		this.properties(new HashMap<String, String>());
 		this.data_parents.clear();
 		this.data_children.clear();
@@ -156,7 +160,12 @@ abstract class EntityAttributeMixin implements MutableEntityAttribute {
 	public StackingBehaviour stackingBehaviour() {
 		return this.data_stackingBehaviour;
 	}
-	
+
+	@Override
+	public FunctionBehaviour functionBehaviour() {
+		return this.data_functionBehaviour;
+	}
+
 	@Override
 	public Map<IEntityAttribute, Double> parents() {
 		return ImmutableMap.copyOf(this.data_parents);

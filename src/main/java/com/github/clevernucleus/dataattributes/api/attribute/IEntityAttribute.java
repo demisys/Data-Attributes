@@ -25,7 +25,13 @@ public interface IEntityAttribute {
 	 * @return The attribute's stacking behaviour.
 	 */
 	StackingBehaviour stackingBehaviour();
-	
+
+
+	/**
+	 * @return The attribute's function behaviour.
+	 */
+	FunctionBehaviour functionBehaviour();
+
 	/**
 	 * @return An immutable map of the function-parents attached to this attribute.
 	 */

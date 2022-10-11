@@ -4,9 +4,10 @@ import java.util.Map;
 
 import com.github.clevernucleus.dataattributes.api.attribute.IEntityAttribute;
 import com.github.clevernucleus.dataattributes.api.attribute.StackingBehaviour;
+import com.github.clevernucleus.dataattributes.api.attribute.FunctionBehaviour;
 
 public interface MutableEntityAttribute extends IEntityAttribute {
-	void override(String translationKey, double minValue, double maxValue, double fallbackValue, double incrementValue, StackingBehaviour stackingBehaviour);
+	void override(String translationKey, double minValue, double maxValue, double fallbackValue, double incrementValue, StackingBehaviour stackingBehaviour, FunctionBehaviour functionBehaviour);
 	
 	void properties(Map<String, String> properties);
 	

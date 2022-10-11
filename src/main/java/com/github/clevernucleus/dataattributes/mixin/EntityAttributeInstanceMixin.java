@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.github.clevernucleus.dataattributes.api.attribute.IEntityAttribute;
 import com.github.clevernucleus.dataattributes.api.attribute.IEntityAttributeInstance;
 import com.github.clevernucleus.dataattributes.api.attribute.StackingBehaviour;
+import com.github.clevernucleus.dataattributes.api.attribute.FunctionBehaviour;
 import com.github.clevernucleus.dataattributes.api.event.EntityAttributeModifiedEvents;
 import com.github.clevernucleus.dataattributes.api.util.VoidConsumer;
 import com.github.clevernucleus.dataattributes.mutable.MutableAttributeContainer;
@@ -87,7 +88,7 @@ abstract class EntityAttributeInstanceMixin implements MutableAttributeInstance,
 	private void data_computeValue(CallbackInfoReturnable<Double> ci) {
 		MutableEntityAttribute attribute = (MutableEntityAttribute)((EntityAttributeInstance)(Object)this).getAttribute();
 		StackingBehaviour behaviour = attribute.stackingBehaviour();
-		double k = 0.0D, v = 0.0D, k2 = 0.0D, v2 = 0.0D;
+		double k = 0.0D, v = 0.0D, k2 = 0.0D, v2 = 0.0D, km = 0.0D, vm = 0.0D;
 		
 		if(this.baseValue > 0.0D) {
 			k = behaviour.stack(k, this.baseValue);
@@ -119,15 +120,23 @@ abstract class EntityAttributeInstanceMixin implements MutableAttributeInstance,
 				
 				double multiplier = parents.get(parent);
 				double value = multiplier * instance.getValue();
-				
-				if(value > 0.0D) {
-					k = behaviour.stack(k, value);
-					// We don't put this here because follow-on attribute values should always be diminishing (if the attribute supports it).
-					// k2 = behaviour.max(k2, value);
+
+				if (FunctionBehaviour.MULTIPLY.equals(parent.functionBehaviour())) {
+					if (value > 0.0D) {
+						km = behaviour.stack(km, value);
+					} else {
+						vm = behaviour.stack(vm, value);
+					}
 				} else {
-					v = behaviour.stack(v, value);
-					// We don't put this here because follow-on attribute values should always be diminishing (if the attribute supports it).
-					// v2 = behaviour.max(v2, value);
+					if (value > 0.0D) {
+						k = behaviour.stack(k, value);
+						// We don't put this here because follow-on attribute values should always be diminishing (if the attribute supports it).
+						// k2 = behaviour.max(k2, value);
+					} else {
+						v = behaviour.stack(v, value);
+						// We don't put this here because follow-on attribute values should always be diminishing (if the attribute supports it).
+						// v2 = behaviour.max(v2, value);
+					}
 				}
 			}
 		}
@@ -138,7 +147,8 @@ abstract class EntityAttributeInstanceMixin implements MutableAttributeInstance,
 		for(EntityAttributeModifier modifier : this.getModifiersByOperation(EntityAttributeModifier.Operation.MULTIPLY_BASE)) {
 			e += d * modifier.getValue();
 		}
-		
+
+		e *= 1.0D + (km - vm);
 		for(EntityAttributeModifier modifier : this.getModifiersByOperation(EntityAttributeModifier.Operation.MULTIPLY_TOTAL)) {
 			e *= 1.0D + modifier.getValue();
 		}

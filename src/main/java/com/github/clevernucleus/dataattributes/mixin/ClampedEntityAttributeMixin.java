@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.github.clevernucleus.dataattributes.api.attribute.StackingBehaviour;
+import com.github.clevernucleus.dataattributes.api.attribute.FunctionBehaviour;
 
 import net.minecraft.entity.attribute.ClampedEntityAttribute;
 
@@ -25,7 +26,7 @@ abstract class ClampedEntityAttributeMixin extends EntityAttributeMixin {
 	
 	@Inject(method = "<init>", at = @At("TAIL"))
 	private void data_init(String translationKey, double fallback, double min, double max, CallbackInfo ci) {
-		this.override(translationKey, min, max, fallback, 0.0D, StackingBehaviour.FLAT);
+		this.override(translationKey, min, max, fallback, 0.0D, StackingBehaviour.FLAT, FunctionBehaviour.ADD);
 	}
 	
 	@Inject(method = "getMinValue", at = @At("HEAD"), cancellable = true)
